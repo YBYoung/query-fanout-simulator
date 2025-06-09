@@ -22,114 +22,44 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize dark mode state
+# Session state for dark mode
 if 'dark_mode' not in st.session_state:
     st.session_state.dark_mode = False
 
-# Dark mode toggle in sidebar
-with st.sidebar:
-    st.session_state.dark_mode = st.toggle("🌙 Dark Mode", value=st.session_state.dark_mode)
-
-# Dynamic CSS based on dark mode state
+# Dynamic CSS function
 def get_css_styles(dark_mode):
     if dark_mode:
         return """
-        <style>
-            .stApp {
-                background-color: #1a1a1a !important;
-                color: #e5e5e5 !important;
-            }
-            .stMarkdown, .stMarkdown p, .stMarkdown div {
-                color: #e5e5e5 !important;
-            }
-            .stSelectbox > div > div {
-                background-color: #2d2d2d !important;
-                color: #e5e5e5 !important;
-            }
-            .stTextInput > div > div > input {
-                background-color: #2d2d2d !important;
-                color: #e5e5e5 !important;
-                border-color: #444444 !important;
-            }
-            .stButton > button {
-                background-color: #ff8c42 !important;
-                color: #1a1a1a !important;
-                border: none !important;
-            }
-            .stButton > button:hover {
-                background-color: #ff7a2e !important;
-            }
-            .stTabs [data-baseweb="tab-list"] {
-                background-color: #2d2d2d !important;
-            }
-            .stTabs [data-baseweb="tab"] {
-                background-color: #2d2d2d !important;
-                color: #e5e5e5 !important;
-            }
-            .stTabs [aria-selected="true"] {
-                background-color: #ff8c42 !important;
-                color: #1a1a1a !important;
-            }
-            .stExpander {
-                background-color: #2d2d2d !important;
-                border-color: #444444 !important;
-            }
-            .stAlert {
-                background-color: #23272e !important;
-                color: #e5e5e5 !important;
-            }
-            .stDownloadButton > button {
-                background-color: #2d2d2d !important;
-                color: #e5e5e5 !important;
-                border: 1px solid #444444 !important;
-            }
-            .stDownloadButton > button:hover {
-                background-color: #3d3d3d !important;
-                border-color: #ff8c42 !important;
-            }
-            html, body, [class*="css"] {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                font-size: 18px;
-                line-height: 1.6;
-            }
-        </style>
+<style>
+    .stApp { background-color: #1a1a1a !important; color: #e5e5e5 !important; }
+    .stMarkdown, .stMarkdown p, .stMarkdown div { color: #e5e5e5 !important; }
+    .stSelectbox > div > div { background-color: #2d2d2d !important; color: #e5e5e5 !important; }
+    .stTextInput > div > div > input { background-color: #2d2d2d !important; color: #e5e5e5 !important; border-color: #444444 !important; }
+    .stButton > button { background-color: #ff8c42 !important; color: #1a1a1a !important; border: none !important; }
+    .stButton > button:hover { background-color: #ff7a2e !important; }
+    .stTabs [data-baseweb="tab-list"] { background-color: #2d2d2d !important; }
+    .stTabs [data-baseweb="tab"] { background-color: #2d2d2d !important; color: #e5e5e5 !important; }
+    .stTabs [aria-selected="true"] { background-color: #ff8c42 !important; color: #1a1a1a !important; }
+    .stExpander { background-color: #2d2d2d !important; border-color: #444444 !important; }
+    .stAlert { background-color: #23272e !important; color: #e5e5e5 !important; }
+    .stDownloadButton > button { background-color: #2d2d2d !important; color: #e5e5e5 !important; border: 1px solid #444444 !important; }
+    .stDownloadButton > button:hover { background-color: #3d3d3d !important; border-color: #ff8c42 !important; }
+    html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.6; }
+</style>
         """
     else:
         return """
-        <style>
-            .stApp {
-                background-color: #ffffff !important;
-                color: #2d2d2d !important;
-            }
-            .stButton > button {
-                background-color: #dc6b2f !important;
-                color: #ffffff !important;
-                border: none !important;
-            }
-            .stButton > button:hover {
-                background-color: #c55a24 !important;
-            }
-            .stTabs [aria-selected="true"] {
-                background-color: #dc6b2f !important;
-                color: #ffffff !important;
-            }
-            .stDownloadButton > button {
-                background-color: #fafafa !important;
-                color: #2d2d2d !important;
-                border: 1px solid #e5e5e5 !important;
-            }
-            .stDownloadButton > button:hover {
-                background-color: #f4f4f4 !important;
-                border-color: #dc6b2f !important;
-            }
-            html, body, [class*="css"] {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                font-size: 18px;
-                line-height: 1.6;
-            }
-        </style>
+<style>
+    .stApp { background-color: #ffffff !important; color: #2d2d2d !important; }
+    .stButton > button { background-color: #dc6b2f !important; color: #ffffff !important; border: none !important; }
+    .stButton > button:hover { background-color: #c55a24 !important; }
+    .stTabs [aria-selected="true"] { background-color: #dc6b2f !important; color: #ffffff !important; }
+    .stDownloadButton > button { background-color: #fafafa !important; color: #2d2d2d !important; border: 1px solid #e5e5e5 !important; }
+    .stDownloadButton > button:hover { background-color: #f4f4f4 !important; border-color: #dc6b2f !important; }
+    html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.6; }
+</style>
         """
-
+        
 # Apply the CSS
 st.markdown(get_css_styles(st.session_state.dark_mode), unsafe_allow_html=True)
 
