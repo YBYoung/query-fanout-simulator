@@ -22,57 +22,116 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS (dynamic dark mode)
-st.markdown("""
-<style>
-    :root {
-        --bg-primary: #ffffff;
-        --bg-secondary: #fafafa;
-        --bg-tertiary: #f4f4f4;
-        --text-primary: #2d2d2d;
-        --text-secondary: #666666;
-        --text-heading: #1a1a1a;
-        --border-color: #e5e5e5;
-        --accent-color: #dc6b2f;
-        --accent-hover: #c55a24;
-        --code-bg: #f5f5f5;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-    }
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #23272e;
-            --bg-tertiary: #2d2d2d;
-            --text-primary: #e5e5e5;
-            --text-secondary: #a0a0a0;
-            --text-heading: #ffffff;
-            --border-color: #444444;
-            --accent-color: #ff8c42;
-            --accent-hover: #ff7a2e;
-            --code-bg: #2d2d2d;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-        }
-        .stApp { background-color: var(--bg-primary) !important; }
-        .stAlert { background-color: var(--bg-secondary) !important; color: var(--text-primary) !important; }
-    }
-    html, body, [class*="css"] {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        font-size: 18px;
-        line-height: 1.6;
-        color: var(--text-primary);
-        background-color: var(--bg-primary);
-    }
-    .stDownloadButton > button {
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    .stDownloadButton > button:hover {
-        background-color: var(--bg-tertiary);
-        border-color: var(--accent-color);
-    }
-</style>
-""", unsafe_allow_html=True)
+# Initialize dark mode state
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Dark mode toggle in sidebar
+with st.sidebar:
+    st.session_state.dark_mode = st.toggle("🌙 Dark Mode", value=st.session_state.dark_mode)
+
+# Dynamic CSS based on dark mode state
+def get_css_styles(dark_mode):
+    if dark_mode:
+        return """
+        <style>
+            .stApp {
+                background-color: #1a1a1a !important;
+                color: #e5e5e5 !important;
+            }
+            .stMarkdown, .stMarkdown p, .stMarkdown div {
+                color: #e5e5e5 !important;
+            }
+            .stSelectbox > div > div {
+                background-color: #2d2d2d !important;
+                color: #e5e5e5 !important;
+            }
+            .stTextInput > div > div > input {
+                background-color: #2d2d2d !important;
+                color: #e5e5e5 !important;
+                border-color: #444444 !important;
+            }
+            .stButton > button {
+                background-color: #ff8c42 !important;
+                color: #1a1a1a !important;
+                border: none !important;
+            }
+            .stButton > button:hover {
+                background-color: #ff7a2e !important;
+            }
+            .stTabs [data-baseweb="tab-list"] {
+                background-color: #2d2d2d !important;
+            }
+            .stTabs [data-baseweb="tab"] {
+                background-color: #2d2d2d !important;
+                color: #e5e5e5 !important;
+            }
+            .stTabs [aria-selected="true"] {
+                background-color: #ff8c42 !important;
+                color: #1a1a1a !important;
+            }
+            .stExpander {
+                background-color: #2d2d2d !important;
+                border-color: #444444 !important;
+            }
+            .stAlert {
+                background-color: #23272e !important;
+                color: #e5e5e5 !important;
+            }
+            .stDownloadButton > button {
+                background-color: #2d2d2d !important;
+                color: #e5e5e5 !important;
+                border: 1px solid #444444 !important;
+            }
+            .stDownloadButton > button:hover {
+                background-color: #3d3d3d !important;
+                border-color: #ff8c42 !important;
+            }
+            html, body, [class*="css"] {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 18px;
+                line-height: 1.6;
+            }
+        </style>
+        """
+    else:
+        return """
+        <style>
+            .stApp {
+                background-color: #ffffff !important;
+                color: #2d2d2d !important;
+            }
+            .stButton > button {
+                background-color: #dc6b2f !important;
+                color: #ffffff !important;
+                border: none !important;
+            }
+            .stButton > button:hover {
+                background-color: #c55a24 !important;
+            }
+            .stTabs [aria-selected="true"] {
+                background-color: #dc6b2f !important;
+                color: #ffffff !important;
+            }
+            .stDownloadButton > button {
+                background-color: #fafafa !important;
+                color: #2d2d2d !important;
+                border: 1px solid #e5e5e5 !important;
+            }
+            .stDownloadButton > button:hover {
+                background-color: #f4f4f4 !important;
+                border-color: #dc6b2f !important;
+            }
+            html, body, [class*="css"] {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 18px;
+                line-height: 1.6;
+            }
+        </style>
+        """
+
+# Apply the CSS
+st.markdown(get_css_styles(st.session_state.dark_mode), unsafe_allow_html=True)
 
 # Session state for view
 if 'view_mode' not in st.session_state:
