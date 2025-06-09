@@ -33,6 +33,25 @@ def get_css_styles(dark_mode):
 <style>
     .stApp { background-color: #1a1a1a !important; color: #e5e5e5 !important; }
     .stMarkdown, .stMarkdown p, .stMarkdown div { color: #e5e5e5 !important; }
+    
+    /* Fix for custom query cards */
+    .stMarkdown div[style*="border: 2px solid"] { 
+        background-color: #2d2d2d !important; 
+        border-color: #444444 !important; 
+    }
+    .stMarkdown div[style*="border: 2px solid"] div { 
+        color: #e5e5e5 !important; 
+    }
+    .stMarkdown div[style*="font-size: 1.25rem"] { 
+        color: #ffffff !important; 
+    }
+    .stMarkdown span[style*="color: #0066cc"] { 
+        color: #66aaff !important; 
+    }
+    .stMarkdown span[style*="color: var(--text-secondary)"] { 
+        color: #a0a0a0 !important; 
+    }
+    
     .stSelectbox > div > div { background-color: #2d2d2d !important; color: #e5e5e5 !important; }
     .stTextInput > div > div > input { background-color: #2d2d2d !important; color: #e5e5e5 !important; border-color: #444444 !important; }
     .stButton > button { background-color: #ff8c42 !important; color: #1a1a1a !important; border: none !important; }
@@ -51,6 +70,25 @@ def get_css_styles(dark_mode):
         return """
 <style>
     .stApp { background-color: #ffffff !important; color: #2d2d2d !important; }
+    
+    /* Fix for custom query cards in light mode */
+    .stMarkdown div[style*="border: 2px solid"] { 
+        background-color: #fafafa !important; 
+        border-color: #e5e5e5 !important; 
+    }
+    .stMarkdown div[style*="border: 2px solid"] div { 
+        color: #2d2d2d !important; 
+    }
+    .stMarkdown div[style*="font-size: 1.25rem"] { 
+        color: #1a1a1a !important; 
+    }
+    .stMarkdown span[style*="color: #0066cc"] { 
+        color: #0066cc !important; 
+    }
+    .stMarkdown span[style*="color: var(--text-secondary)"] { 
+        color: #666666 !important; 
+    }
+    
     .stButton > button { background-color: #dc6b2f !important; color: #ffffff !important; border: none !important; }
     .stButton > button:hover { background-color: #c55a24 !important; }
     .stTabs [aria-selected="true"] { background-color: #dc6b2f !important; color: #ffffff !important; }
