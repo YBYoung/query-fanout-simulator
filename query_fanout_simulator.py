@@ -297,6 +297,13 @@ def display_query_results(df: pd.DataFrame, reasoning: str, target_count: int, v
     with st.expander("View all queries as table", expanded=False):
         st.dataframe(df[['query', 'type', 'user_intent', 'reasoning']])
 
+# Sidebar with dark mode toggle
+with st.sidebar:
+    new_dark_mode = st.toggle("🌙 Dark Mode", value=st.session_state.dark_mode)
+    if new_dark_mode != st.session_state.dark_mode:
+        st.session_state.dark_mode = new_dark_mode
+        st.rerun()
+
 # Header
 st.title("Query Fan-Out Simulator")
 st.markdown("Understand how AI search systems expand queries to capture user intent")
