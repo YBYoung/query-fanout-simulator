@@ -3,3 +3,5 @@ pandas==2.1.4
 google-generativeai==0.8.5
 python-dotenv==1.1.0
 protobuf>=4.25.0
+sentence-transformers
+torch
