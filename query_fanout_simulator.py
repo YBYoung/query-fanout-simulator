@@ -26,75 +26,297 @@ st.set_page_config(
 if 'dark_mode' not in st.session_state:
     st.session_state.dark_mode = False
 
+# Session state for model initialization
+if 'sentence_model' not in st.session_state:
+    with st.spinner("Loading embedding model..."):
+        st.session_state.sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+
 # Dynamic CSS function
 def get_css_styles(dark_mode):
     if dark_mode:
         return """
 <style>
-    .stApp { background-color: #1a1a1a !important; color: #e5e5e5 !important; }
-    .stMarkdown, .stMarkdown p, .stMarkdown div { color: #e5e5e5 !important; }
-    
-    /* Fix for custom query cards */
-    .stMarkdown div[style*="border: 2px solid"] { 
-        background-color: #2d2d2d !important; 
-        border-color: #444444 !important; 
-    }
-    .stMarkdown div[style*="border: 2px solid"] div { 
-        color: #e5e5e5 !important; 
-    }
-    .stMarkdown div[style*="font-size: 1.25rem"] { 
+    /* Dark Mode Styles */
+    .stApp { background-color: #0f0f0f !important; color: #ffffff !important; }
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 { 
         color: #ffffff !important; 
     }
-    .stMarkdown span[style*="color: #0066cc"] { 
-        color: #66aaff !important; 
+    
+    /* Query Card Styles - Dark Mode */
+    .query-card {
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        border-radius: 12px !important;
+        padding: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s ease !important;
     }
-    .stMarkdown span[style*="color: var(--text-secondary)"] { 
-        color: #a0a0a0 !important; 
+    .query-card:hover {
+        border-color: #ff8c42 !important;
+        box-shadow: 0 8px 12px rgba(255, 140, 66, 0.1) !important;
+    }
+    .query-title { 
+        color: #ffffff !important; 
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem !important;
+    }
+    .query-label { 
+        color: #999999 !important; 
+        font-weight: 600 !important;
+    }
+    .query-type { 
+        color: #66aaff !important; 
+        font-weight: 600 !important;
+    }
+    .query-content { 
+        color: #e0e0e0 !important; 
+    }
+    .query-reasoning { 
+        color: #b0b0b0 !important; 
     }
     
-    .stSelectbox > div > div { background-color: #2d2d2d !important; color: #e5e5e5 !important; }
-    .stTextInput > div > div > input { background-color: #2d2d2d !important; color: #e5e5e5 !important; border-color: #444444 !important; }
-    .stButton > button { background-color: #ff8c42 !important; color: #1a1a1a !important; border: none !important; }
-    .stButton > button:hover { background-color: #ff7a2e !important; }
-    .stTabs [data-baseweb="tab-list"] { background-color: #2d2d2d !important; }
-    .stTabs [data-baseweb="tab"] { background-color: #2d2d2d !important; color: #e5e5e5 !important; }
-    .stTabs [aria-selected="true"] { background-color: #ff8c42 !important; color: #1a1a1a !important; }
-    .stExpander { background-color: #2d2d2d !important; border-color: #444444 !important; }
-    .stAlert { background-color: #23272e !important; color: #e5e5e5 !important; }
-    .stDownloadButton > button { background-color: #2d2d2d !important; color: #e5e5e5 !important; border: 1px solid #444444 !important; }
-    .stDownloadButton > button:hover { background-color: #3d3d3d !important; border-color: #ff8c42 !important; }
-    html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.6; }
+    /* Form Elements - Dark Mode */
+    .stSelectbox > div > div { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+        border: 1px solid #333333 !important;
+    }
+    .stTextInput > div > div > input { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+        border: 1px solid #333333 !important;
+    }
+    .stTextInput > div > div > input::placeholder { 
+        color: #666666 !important;
+    }
+    
+    /* Buttons - Dark Mode */
+    .stButton > button { 
+        background-color: #ff8c42 !important; 
+        color: #000000 !important; 
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button:hover { 
+        background-color: #ff7a2e !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(255, 140, 66, 0.3) !important;
+    }
+    
+    /* Tabs - Dark Mode */
+    .stTabs [data-baseweb="tab-list"] { 
+        background-color: transparent !important;
+        border-bottom: 2px solid #333333 !important;
+    }
+    .stTabs [data-baseweb="tab"] { 
+        background-color: transparent !important; 
+        color: #999999 !important;
+        border: none !important;
+        padding: 0.5rem 1.5rem !important;
+        margin-right: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover { 
+        color: #ffffff !important;
+    }
+    .stTabs [aria-selected="true"] { 
+        background-color: transparent !important; 
+        color: #ff8c42 !important;
+        border-bottom: 3px solid #ff8c42 !important;
+        border-radius: 0 !important;
+    }
+    
+    /* Other Elements - Dark Mode */
+    .stExpander { 
+        background-color: #1a1a1a !important; 
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+    }
+    .stAlert > div { 
+        background-color: #1a2744 !important; 
+        color: #ffffff !important;
+        border: 1px solid #2a3f5f !important;
+        border-radius: 8px !important;
+    }
+    .stDownloadButton > button { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    .stDownloadButton > button:hover { 
+        background-color: #2a2a2a !important; 
+        border-color: #ff8c42 !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Metrics - Dark Mode */
+    [data-testid="metric-container"] {
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+    }
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: #ff8c42 !important;
+    }
+    
+    /* Typography */
+    html, body, [class*="css"] { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+        font-size: 16px; 
+        line-height: 1.6; 
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 </style>
         """
     else:
         return """
 <style>
-    .stApp { background-color: #ffffff !important; color: #2d2d2d !important; }
-    
-    /* Fix for custom query cards in light mode */
-    .stMarkdown div[style*="border: 2px solid"] { 
-        background-color: #fafafa !important; 
-        border-color: #e5e5e5 !important; 
-    }
-    .stMarkdown div[style*="border: 2px solid"] div { 
-        color: #2d2d2d !important; 
-    }
-    .stMarkdown div[style*="font-size: 1.25rem"] { 
+    /* Light Mode Styles */
+    .stApp { background-color: #ffffff !important; color: #1a1a1a !important; }
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 { 
         color: #1a1a1a !important; 
     }
-    .stMarkdown span[style*="color: #0066cc"] { 
-        color: #0066cc !important; 
+    
+    /* Query Card Styles - Light Mode */
+    .query-card {
+        background-color: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 12px !important;
+        padding: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        transition: all 0.3s ease !important;
     }
-    .stMarkdown span[style*="color: var(--text-secondary)"] { 
+    .query-card:hover {
+        border-color: #dc6b2f !important;
+        box-shadow: 0 4px 8px rgba(220, 107, 47, 0.1) !important;
+    }
+    .query-title { 
+        color: #1a1a1a !important; 
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem !important;
+    }
+    .query-label { 
         color: #666666 !important; 
+        font-weight: 600 !important;
+    }
+    .query-type { 
+        color: #0066cc !important; 
+        font-weight: 600 !important;
+    }
+    .query-content { 
+        color: #333333 !important; 
+    }
+    .query-reasoning { 
+        color: #555555 !important; 
     }
     
-    .stButton > button { background-color: #dc6b2f !important; color: #ffffff !important; border: none !important; }
-    .stButton > button:hover { background-color: #c55a24 !important; }
-    .stTabs [aria-selected="true"] { background-color: #dc6b2f !important; color: #ffffff !important; }
-    .stDownloadButton > button { background-color: #fafafa !important; color: #2d2d2d !important; border: 1px solid #e5e5e5 !important; }
-    .stDownloadButton > button:hover { background-color: #f4f4f4 !important; border-color: #dc6b2f !important; }
-    html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 18px; line-height: 1.6; }
+    /* Form Elements - Light Mode */
+    .stSelectbox > div > div { 
+        background-color: #ffffff !important; 
+        color: #1a1a1a !important; 
+        border: 1px solid #e0e0e0 !important;
+    }
+    .stTextInput > div > div > input { 
+        background-color: #ffffff !important; 
+        color: #1a1a1a !important; 
+        border: 1px solid #e0e0e0 !important;
+    }
+    .stTextInput > div > div > input::placeholder { 
+        color: #999999 !important;
+    }
+    
+    /* Buttons - Light Mode */
+    .stButton > button { 
+        background-color: #dc6b2f !important; 
+        color: #ffffff !important; 
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button:hover { 
+        background-color: #c55a24 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(220, 107, 47, 0.3) !important;
+    }
+    
+    /* Tabs - Light Mode */
+    .stTabs [data-baseweb="tab-list"] { 
+        background-color: transparent !important;
+        border-bottom: 2px solid #e0e0e0 !important;
+    }
+    .stTabs [data-baseweb="tab"] { 
+        background-color: transparent !important; 
+        color: #666666 !important;
+        border: none !important;
+        padding: 0.5rem 1.5rem !important;
+        margin-right: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover { 
+        color: #1a1a1a !important;
+    }
+    .stTabs [aria-selected="true"] { 
+        background-color: transparent !important; 
+        color: #dc6b2f !important;
+        border-bottom: 3px solid #dc6b2f !important;
+        border-radius: 0 !important;
+    }
+    
+    /* Other Elements - Light Mode */
+    .stExpander { 
+        background-color: #fafafa !important; 
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+    }
+    .stAlert > div { 
+        background-color: #e7f3ff !important; 
+        color: #1a1a1a !important;
+        border: 1px solid #b3d9ff !important;
+        border-radius: 8px !important;
+    }
+    .stDownloadButton > button { 
+        background-color: #ffffff !important; 
+        color: #1a1a1a !important; 
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    .stDownloadButton > button:hover { 
+        background-color: #f5f5f5 !important; 
+        border-color: #dc6b2f !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Metrics - Light Mode */
+    [data-testid="metric-container"] {
+        background-color: #fafafa !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+    }
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: #dc6b2f !important;
+    }
+    
+    /* Typography */
+    html, body, [class*="css"] { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+        font-size: 16px; 
+        line-height: 1.6; 
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 </style>
         """
         
@@ -173,6 +395,41 @@ def parse_gemini_response(response_text: str) -> Tuple[str, int, List[Dict]]:
         st.warning(f"Failed to parse JSON response: {e}")
     return "Could not extract structured reasoning.", 0, []
 
+def deduplicate_queries(queries: List[str], threshold: float = 0.85) -> List[int]:
+    """
+    Return indices of queries to keep after deduplication.
+    Uses the cached sentence transformer model.
+    """
+    if not queries:
+        return []
+    
+    try:
+        # Use the cached model from session state
+        model_emb = st.session_state.sentence_model
+        
+        # Encode queries
+        embeddings = model_emb.encode(queries, convert_to_tensor=True, show_progress_bar=False)
+        
+        keep_indices = []
+        for idx, embedding in enumerate(embeddings):
+            if not keep_indices:
+                keep_indices.append(idx)
+            else:
+                # Compare with already kept embeddings
+                kept_embeddings = embeddings[keep_indices]
+                similarities = util.pytorch_cos_sim(embedding, kept_embeddings)
+                
+                # Keep if all similarities are below threshold
+                if torch.max(similarities).item() < threshold:
+                    keep_indices.append(idx)
+        
+        return keep_indices
+        
+    except Exception as e:
+        st.warning(f"Deduplication skipped due to error: {str(e)}")
+        # Return all indices if deduplication fails
+        return list(range(len(queries)))
+
 def generate_synthetic_queries(query: str) -> Tuple[str, int, pd.DataFrame]:
     try:
         prompt = f"""You are an expert at understanding how Google's AI Mode generates synthetic queries through query fan-out.
@@ -184,7 +441,7 @@ Based on this, decide how many synthetic queries are required for comprehensive 
 State the number in "target_query_count" and generate up to that number.
 
 Include as many queries as possible that are:
-- Distinct in their wording or underlying intent (it’s okay if some overlap, as long as they would return different results in search)
+- Distinct in their wording or underlying intent (it's okay if some overlap, as long as they would return different results in search)
 - Relevant and useful to the core topic (avoid queries that are totally off-topic, nonsensical, or empty)
 - Covering different perspectives, subtopics, or intent angles—even if some are less common
 - Meet the needs of different user intents or coverage areas
@@ -242,20 +499,10 @@ Respond in this exact JSON format:
 
         df = df[~df['query'].apply(is_low_quality)].copy()
 
-        # Embedding-based deduplication (looser threshold)
-        queries = df['query'].tolist()
-        if queries:
-            dedup_threshold = 0.85
-            model_emb = SentenceTransformer('all-MiniLM-L6-v2')
-            emb = model_emb.encode(queries, convert_to_tensor=True)
-            keep_indices = []
-            for idx, e in enumerate(emb):
-                if not keep_indices:
-                    keep_indices.append(idx)
-                else:
-                    sims = util.pytorch_cos_sim(e, emb[keep_indices])
-                    if torch.max(sims) < dedup_threshold:
-                        keep_indices.append(idx)
+        # Embedding-based deduplication
+        query_list = df['query'].tolist()
+        if query_list:
+            keep_indices = deduplicate_queries(query_list, threshold=0.85)
             df = df.iloc[keep_indices].reset_index(drop=True)
 
         return reasoning, target_count, df
@@ -290,50 +537,44 @@ def process_batch_queries(queries: List[str]) -> pd.DataFrame:
 def display_query_results(df: pd.DataFrame, reasoning: str, target_count: int, view_mode: str = 'card'):
     # Generation statistics
     st.markdown("### Generation Statistics")
-    st.markdown(f"""
-    <div class="generation-stats">
-        <p><strong>Attempted to generate:</strong> {target_count} queries</p>
-        <p><strong>Successfully generated:</strong> {len(df)} queries</p>
-        <p><strong>Generation rate:</strong> {(len(df)/target_count*100):.1f}%</p>
-        <p style="font-size: 15px; color: #666; margin-top: 0.5rem;">
-        The AI determines the optimal number of queries based on complexity. 
-        Actual results may vary to maintain quality over quantity.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Target Queries", target_count)
+    with col2:
+        st.metric("Generated", len(df))
+    with col3:
+        st.metric("Success Rate", f"{(len(df)/target_count*100):.1f}%")
+    
     st.markdown("### AI's Reasoning")
     st.info(reasoning)
 
-    # Distinct card for every query
+    # Generated queries
     st.markdown("### Generated Synthetic Queries")
     for idx, row in df.iterrows():
         st.markdown(f"""
-        <div style="
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.3rem;
-            margin-bottom: 1.5rem;
-            background-color: var(--bg-secondary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        ">
-            <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">{row['query']}</div>
-            <div style="margin-bottom: 0.2rem;">
-                <span style="font-weight: 600; color: #aaa;">Type:</span>
-                <span style="color: #0066cc; font-weight: 600;">{row['type'].capitalize()}</span>
+        <div class="query-card">
+            <div class="query-title">{row['query']}</div>
+            <div style="margin-bottom: 0.5rem;">
+                <span class="query-label">Type:</span>
+                <span class="query-type">{row['type'].replace('_', ' ').title()}</span>
             </div>
-            <div style="margin-bottom: 0.2rem;">
-                <span style="font-weight: 600; color: #aaa;">Intent:</span>
-                <span>{row['user_intent']}</span>
+            <div style="margin-bottom: 0.5rem;">
+                <span class="query-label">Intent:</span>
+                <span class="query-content">{row['user_intent']}</span>
             </div>
-            <div style="margin-bottom: 0.1rem;">
-                <span style="font-weight: 600; color: #aaa;">Reasoning:</span>
-                <span style="color: var(--text-secondary);">{row['reasoning']}</span>
+            <div>
+                <span class="query-label">Reasoning:</span>
+                <span class="query-reasoning">{row['reasoning']}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    with st.expander("View all queries as table", expanded=False):
-        st.dataframe(df[['query', 'type', 'user_intent', 'reasoning']])
+    with st.expander("📊 View as Table", expanded=False):
+        st.dataframe(
+            df[['query', 'type', 'user_intent', 'reasoning']],
+            use_container_width=True,
+            height=400
+        )
 
 # Sidebar with dark mode toggle
 with st.sidebar:
@@ -435,30 +676,23 @@ with tab2:
                                 query_results = results_df[results_df['original_query'] == orig_query]
                                 target = query_results.iloc[0]['target_count']
                                 actual = query_results.iloc[0]['actual_count']
-                                with st.expander(f"{orig_query} (Generated: {actual}/{target})"):
-                                    st.caption(f"Attempted: {target} queries | Generated: {actual} queries | Success rate: {(actual/target*100):.1f}%")
+                                with st.expander(f"📝 {orig_query} (Generated: {actual}/{target})", expanded=False):
+                                    st.markdown(f"**Success Rate:** {(actual/target*100):.1f}%")
                                     for _, row in query_results.iterrows():
                                         st.markdown(f"""
-                                        <div style="
-                                            border: 2px solid var(--border-color);
-                                            border-radius: 10px;
-                                            padding: 1.3rem;
-                                            margin-bottom: 1.5rem;
-                                            background-color: var(--bg-secondary);
-                                            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-                                        ">
-                                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-color); margin-bottom: 0.25rem;">{row['query']}</div>
-                                            <div style="margin-bottom: 0.2rem;">
-                                                <span style="font-weight: 600; color: #aaa;">Type:</span>
-                                                <span style="color: #0066cc; font-weight: 600;">{row['type'].capitalize()}</span>
+                                        <div class="query-card">
+                                            <div class="query-title">{row['query']}</div>
+                                            <div style="margin-bottom: 0.5rem;">
+                                                <span class="query-label">Type:</span>
+                                                <span class="query-type">{row['type'].replace('_', ' ').title()}</span>
                                             </div>
-                                            <div style="margin-bottom: 0.2rem;">
-                                                <span style="font-weight: 600; color: #aaa;">Intent:</span>
-                                                <span>{row['user_intent']}</span>
+                                            <div style="margin-bottom: 0.5rem;">
+                                                <span class="query-label">Intent:</span>
+                                                <span class="query-content">{row['user_intent']}</span>
                                             </div>
-                                            <div style="margin-bottom: 0.1rem;">
-                                                <span style="font-weight: 600; color: #aaa;">Reasoning:</span>
-                                                <span style="color: var(--text-secondary);">{row['reasoning']}</span>
+                                            <div>
+                                                <span class="query-label">Reasoning:</span>
+                                                <span class="query-reasoning">{row['reasoning']}</span>
                                             </div>
                                         </div>
                                         """, unsafe_allow_html=True)
